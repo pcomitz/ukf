@@ -7,6 +7,10 @@
 #include <string>
 #include <fstream>
 
+/********************************************
+ * UKF Project 2
+ ********************************************/
+
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
@@ -102,6 +106,13 @@ public:
    * @param meas_package The measurement at k+1
    */
   void UpdateRadar(MeasurementPackage meas_package);
+
+  /**
+   * phc
+   * convenience method to check angle
+   * @param ang the pointer to the angle
+   */
+  void CheckAngle(double* ang);
 };
 
 #endif /* UKF_H */
