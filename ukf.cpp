@@ -330,13 +330,28 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
   //3/20/18 try p1 approach
   //from p1 EKF
   //from L5_12 for LASER
-  MatrixXd H_ = MatrixXd(2, 4);
-  H_ << 1, 0, 0, 0,
-        0, 1, 0, 0;
-  VectorXd z_pred = H_ * x_;
+
+  //need R measurement noise covariance matrix
+  MatrixXd R_laser = MatrixXd(2, 2);
+  R_laser << std_laspx_*std_laspx_, 0,
+              0, std_laspy_*std_laspy_;
+
+  MatrixXd H = MatrixXd(2, 4);
+  // this isn't right ....., need to use sigma points
+  H << 1, 0, 0, 0,
+       0, 1, 0, 0;
+
+  //use the raw measurements
+  VectorXd z = VectorXd::Zero(2);
+  z << meas_package.raw_measurements_(0),meas_package.raw_measurements_(1);
+  std::cout<<"before z_pred"<<std::endl;
+  //this blows up because of matrix dimensions
+  // is H even used or needed?
+  VectorXd z_pred = H * x_;
+  std::cout<<"after z_pred"<<std::endl;
   VectorXd y = z - z_pred;
-  MatrixXd Ht = H_.transpose();
-  MatrixXd S = H_ * P_ * Ht + R_;
+  MatrixXd Ht = H.transpose();
+  MatrixXd S = H * P_ * Ht + R_laser;
   MatrixXd Si = S.inverse();
   MatrixXd PHt = P_ * Ht;
   MatrixXd K = PHt * Si;
@@ -346,7 +361,7 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
   //std::cout<<"Update: new estimate:"<<x_<<std::endl;
   long x_size = x_.size();
   MatrixXd I = MatrixXd::Identity(x_size, x_size);
-  P_ = (I - K * H_) * P_;
+  P_ = (I - K * H) * P_;
 
   //added from p1
 
